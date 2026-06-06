@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haluweb - Loading Reality...</title>
     <style>
-        /* We removed the restrictive wrapper so the AI gets the full screen back! */
         body, html {
             margin: 0;
             padding: 0;
@@ -13,7 +12,6 @@
             height: 100%;
             background: #0f0f16;
         }
-
         #loader {
             display: flex;
             flex-direction: column;
@@ -40,7 +38,7 @@
             width: 100%;
             min-height: 100vh;
             background: white;
-            display: none; /* Hidden until the AI finishes typing */
+            display: none;
         }
     </style>
 </head>
@@ -54,21 +52,26 @@
     <div id="website-container"></div>
 
     <script>
-        const OPENROUTER_API_KEY = "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";
+        // THE HACK: Ask the user for the key and save it to their browser memory
+        let OPENROUTER_API_KEY = localStorage.getItem("haluweb_key");
+        if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === "null") {
+            OPENROUTER_API_KEY = prompt("🔑 SECURITY BYPASS: Enter your OpenRouter API Key to start Haluweb:");
+            localStorage.setItem("haluweb_key", OPENROUTER_API_KEY);
+        }
 
         const SYSTEM_PROMPT = `
         You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre single-page websites.
         
         STRICT RULES FOR TOKENS & LAYOUT:
-        1. KEEP IT SHORT. Do not generate massive pages. Use minimal, efficient HTML/CSS to save tokens. Max 2 or 3 distinct sections.
-        2. Design it to look beautiful and normal on a full-screen desktop layout, but make the actual text/business idea completely unhinged and funny.
+        1. KEEP IT SHORT. Max 2 or 3 distinct sections.
+        2. Design it to look beautiful and normal on a full-screen desktop layout, but make the text completely unhinged.
         
-        STRICT RULE FOR IMAGES (CRITICAL):
-        You MUST use exactly this URL format for images: "https://picsum.photos/seed/{random_word}/400/300". 
-        Replace {random_word} with a word related to your concept. NEVER invent your own URLs. ALWAYS use this picsum format.
+        STRICT RULE FOR IMAGES:
+        You MUST use this URL format for images: "https://picsum.photos/seed/{random_word}/400/300". 
+        Replace {random_word} with a word related to your concept. NEVER invent your own URLs.
         
         BUTTON LOGIC:
-        Every button must have a funny inline JavaScript 'onclick' alert that pranks the user or says something absurd.
+        Every button must have a funny inline JavaScript 'onclick' alert that pranks the user.
 
         Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html).
         `;
@@ -84,7 +87,8 @@
                         "X-Title": "HaluWeb"
                     },
                     body: JSON.stringify({
-                        "model": "openai/gpt-oss-120b:free", // Keeps it strictly on the free tier
+                        // Using Llama 3.1 8B as it is extremely fast, free, and highly reliable
+                        "model": "meta-llama/llama-3.1-8b-instruct:free", 
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
                             { "role": "user", "content": "Generate a fast, short, full-screen, funny website with working Picsum images." }
@@ -92,33 +96,34 @@
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error("API Error");
+                // If the key is dead or disabled, this clears it from memory so you can type a new one!
+                if (response.status === 401) {
+                    localStorage.removeItem("haluweb_key");
+                    throw new Error("API Key rejected. I deleted it. Refresh the page to enter a working key!");
                 }
+                
+                if (!response.ok) throw new Error("API Error: Servers might be busy.");
 
                 const data = await response.json();
                 let aiHtml = data.choices[0].message.content;
+                aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
 
-                // Clean up markdown blocks
-                aiHtml = aiHtml.replace(/```html/g, "").replace(/
-```/g, "").trim();
-
-                // Inject and display
                 document.getElementById('loader').style.display = 'none';
                 const container = document.getElementById('website-container');
                 container.innerHTML = aiHtml;
                 container.style.display = 'block';
                 
-                const aiTitle = container.querySelector("title, h1");
-                if (aiTitle) document.title = "Haluweb - " + aiTitle.innerText.substring(0, 30);
-
             } catch (error) {
                 console.error(error);
-                document.getElementById('loader').innerHTML = "🛑 The reality portal collapsed! Refresh to try again.";
+                document.getElementById('loader').innerHTML = `🛑 ${error.message}`;
             }
         }
 
-        generateHaluweb();
+        if (OPENROUTER_API_KEY) {
+            generateHaluweb();
+        } else {
+            document.getElementById('loader').innerHTML = "🛑 You didn't enter a key! Refresh to try again.";
+        }
     </script>
 </body>
 </html>
