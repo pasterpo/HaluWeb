@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Efficiency Mode</title>
+    <title>Haluweb - Full Experience</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; min-height: 100vh; background: #000; color: #fff; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; background: #0f0f16; font-family: sans-serif; color: #fff; }
         #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0f0; }
         .spinner { border: 4px solid #111; width: 40px; height: 40px; border-radius: 50%; border-top-color: #0f0; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* This wrapper fixes the "baby website" look */
+        .page-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; background: white; color: #333; min-height: 100vh; }
+        
         #error-box { display: none; padding: 20px; color: #f00; }
         #website-container { width: 100%; display: none; }
     </style>
 </head>
 <body>
     <div id="loader">
-        <div class="spinner" id="spin-ring"></div>
-        <p>Harvesting 1000 tokens of chaos...</p>
+        <div class="spinner"></div>
+        <p>Forging a real website (2000 token limit)...</p>
         <div id="error-box"></div>
     </div>
     <div id="website-container"></div>
@@ -25,17 +29,17 @@
         let key = localStorage.getItem("haluweb_key");
         if (!key) { key = prompt("API Key:"); localStorage.setItem("haluweb_key", key); }
 
-        // This prompt forces the AI to be efficient with its token budget
+        // The SYSTEM_PROMPT now forces a layout wrapper
         const SYSTEM_PROMPT = `
-        You are Haluweb. Generate a bizarre, unhinged website.
+        You are Haluweb. Generate a bizarre, unhinged, long-scrolling website.
         
-        EFFICIENCY RULES:
-        1. USE MINIFIED HTML/CSS. Do not use unnecessary whitespace. 
-        2. Keep the page structure dense. 
-        3. You have a HARD 1000-token limit. If you reach 900 tokens, conclude immediately.
+        CRITICAL RULES:
+        1. WRAP ALL CONTENT in a single <div class="page-wrapper">...</div>.
+        2. Content: You must write extensive text, lore, or fake news. No just-image-lists.
+        3. Use CSS Grid or Flexbox inside the wrapper to make it look professional, not basic.
         4. Use picsum.photos for images. 
-        5. Every button must have an 'onclick' prank alert.
-        6. Keep CSS properly formatted, properly fitted in the screen, etc.
+        5. Every button must have a prank 'onclick' alert.
+        6. Make the page very long (scrollable).
         
         Output raw HTML only. No markdown.
         `;
@@ -47,10 +51,10 @@
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         "model": "google/gemini-2.5-flash-lite", 
-                        "max_tokens": 1000, // <--- THE HARD LIMIT
+                        "max_tokens": 2000, // <--- Bumping to 2000 tokens for real length
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Create a chaotic long-scroll website." }
+                            { "role": "user", "content": "Create a long, hilarious, high-quality, satirical website." }
                         ]
                     })
                 });
