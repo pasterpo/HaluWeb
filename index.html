@@ -9,9 +9,10 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            min-height: 100vh; /* Changed from height: 100% so it can grow and scroll! */
             background: #0f0f16;
             font-family: system-ui, sans-serif;
+            overflow-x: hidden; /* Stops left-right scrolling, allows up-down scrolling */
         }
         #loader {
             display: flex;
@@ -53,6 +54,7 @@
             min-height: 100vh;
             background: white;
             display: none;
+            overflow-y: auto; /* Forces the scrollbar to exist if content is long */
         }
     </style>
 </head>
@@ -76,16 +78,17 @@
         const SYSTEM_PROMPT = `
         You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre single-page websites.
         
-        STRICT RULES FOR TOKENS & LAYOUT:
-        1. KEEP IT SHORT. Max 2 distinct sections.
-        2. Design it to look beautiful on a full-screen desktop, but make the text completely unhinged.
+        LAYOUT & CONTENT RULES:
+        1. Write properly formatted HTML and inline CSS (<style>). It does not need to look premium, but it MUST be well-structured and legible.
+        2. Generate A LOT of content. Make it a very long page with multiple weird sections, bizarre rants, fake products, or chaotic lore so the user has to scroll down.
+        3. DO NOT use 'overflow: hidden' on the body or html. Do not hide the scrollbar.
+        4. Make the text absolutely unhinged, deeply satirical, and unpredictable.
         
         STRICT RULE FOR IMAGES:
-        You MUST use this URL format for images: "https://picsum.photos/seed/{random_word}/400/300". 
-        Replace {random_word} with a word related to your concept. NEVER invent your own URLs.
+        You MUST use this exact URL format for all images: "https://picsum.photos/seed/{random_word}/800/600". Replace {random_word} with a concept word. NEVER invent URLs.
         
         BUTTON LOGIC:
-        Every button must have a funny inline JavaScript 'onclick' alert.
+        Every single button must have a hilarious inline JavaScript 'onclick' alert that pranks the user.
 
         Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html).
         `;
@@ -116,10 +119,10 @@
                         "model": "google/gemini-2.5-flash-lite", 
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Generate a fast, short, full-screen, funny website with working Picsum images." }
+                            { "role": "user", "content": "Generate a massive, hilarious, properly formatted long-scroll website with working Picsum images." }
                         ]
                     })
-                }); // THIS BRACKET WAS MISSING!
+                });
 
                 if (response.status === 401) {
                     localStorage.removeItem("haluweb_key");
