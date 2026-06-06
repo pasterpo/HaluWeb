@@ -1,95 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Loading Reality...</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            background: #0f0f16;
-        }
-        #loader {
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 22px;
-            background: #0f0f16;
-            color: #00ffcc;
-            text-align: center;
-            padding: 20px;
-        }
-        .spinner {
-            border: 4px solid rgba(0,255,204,0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border-left-color: #00ffcc;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #website-container {
-            width: 100%;
-            height: 100%;
-            background: white;
-        }
-        
-        #error-details {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #ff5555;
-            background: rgba(255,0,0,0.1);
-            padding: 10px;
-            border-radius: 5px;
-            max-width: 80%;
-            word-wrap: break-word;
-            text-align: left;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="loader">
-        <div class="spinner" id="spinny-thing"></div>
-        <div id="status-text">🔮 Haluweb is shifting dimensions...<br><span style="font-size: 14px; color: #888;">Generating a deeply ridiculous website...</span></div>
-        <div id="error-details"></div>
-    </div>
-    
-    <div id="website-container"></div>
-
-    <script>
+<script>
         const OPENROUTER_API_KEY = "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";
-
-        const SYSTEM_PROMPT = `
-        You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre, and funny single-page websites. 
-        Generate a single, complete HTML page (including full layout and embedded CSS styling inside a <style> tag). 
-        
-        The website must look like an absurd business, a fake unhinged startup, a bizarre hobbyist blog, or a local service from an alternate universe. 
-        
-        Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (```html). Start directly with HTML elements or a container. Do not write any explanations outside the HTML code.
-        `;
+        const SYSTEM_PROMPT = "You are Haluweb, a chaotic, hilarious AI. Generate a complete HTML page including CSS. Look like an absurd business or startup. Output ONLY valid, raw HTML. No markdown.";
 
         async function generateHaluweb() {
             try {
-                const response = await fetch("[https://openrouter.ai/api/v1/chat/completions](https://openrouter.ai/api/v1/chat/completions)", {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                        "Authorization": "Bearer " + OPENROUTER_API_KEY,
                         "Content-Type": "application/json",
-                        "HTTP-Referer": "[https://pasterpo.github.io/HaluWeb/](https://pasterpo.github.io/HaluWeb/)", 
+                        "HTTP-Referer": "https://pasterpo.github.io/HaluWeb/",
                         "X-Title": "HaluWeb"
                     },
                     body: JSON.stringify({
-                        "model": "google/gemini-2.5-flash-lite", 
+                        "model": "google/gemini-2.5-flash-lite",
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
                             { "role": "user", "content": "Invent a hilarious and completely random new website layout and concept right now." }
@@ -97,20 +21,15 @@
                     })
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text(); 
-                    throw new Error(`OpenRouter Error ${response.status}: ${errorText}`);
-                }
+                if (!response.ok) throw new Error("HTTP error " + response.status);
 
                 const data = await response.json();
-                
-                if (!data.choices || data.choices.length === 0) {
-                    throw new Error("API responded, but returned no choices.");
-                }
-
                 let content = data.choices[0].message.content;
-                // Combined cleanup into one line to prevent syntax errors
-                let aiHtml = content.substring(content.indexOf('<')).replace(/```html/g, "").replace(/```/g, "").trim();
+                
+                // FIXED: This removes the syntax error by using split/join instead of complex Regex
+                let aiHtml = content.split("```html").join("");
+                aiHtml = aiHtml.split("```").join("");
+                aiHtml = aiHtml.trim();
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('website-container').innerHTML = aiHtml;
@@ -121,14 +40,12 @@
             } catch (error) {
                 console.error("Full Error:", error);
                 document.getElementById('spinny-thing').style.display = 'none';
-                document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
+                document.getElementById('status-text').innerHTML = "🛑 Reality collapsed!";
                 const errorDiv = document.getElementById('error-details');
                 errorDiv.style.display = 'block';
-                errorDiv.innerText = "Technical details: " + error.message;
+                errorDiv.innerText = "Error: " + error.message;
             }
         }
 
         generateHaluweb();
     </script>
-</body>
-</html>
