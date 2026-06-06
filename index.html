@@ -108,8 +108,9 @@
                     throw new Error("API responded, but returned no choices.");
                 }
 
-                let aiHtml = data.choices[0].message.content;
-                aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
+                let content = data.choices[0].message.content;
+                // Combined cleanup into one line to prevent syntax errors
+                let aiHtml = content.substring(content.indexOf('<')).replace(/```html/g, "").replace(/```/g, "").trim();
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('website-container').innerHTML = aiHtml;
@@ -119,10 +120,8 @@
 
             } catch (error) {
                 console.error("Full Error:", error);
-                
                 document.getElementById('spinny-thing').style.display = 'none';
                 document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
-                
                 const errorDiv = document.getElementById('error-details');
                 errorDiv.style.display = 'block';
                 errorDiv.innerText = "Technical details: " + error.message;
