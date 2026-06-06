@@ -11,6 +11,7 @@
             width: 100%;
             height: 100%;
             overflow-x: hidden;
+            background: #0f0f16; /* Fallback background */
         }
         #loader {
             font-family: 'Courier New', Courier, monospace;
@@ -38,14 +39,30 @@
         #website-container {
             width: 100%;
             height: 100%;
+            background: white; /* Ensure generated content has a background */
+        }
+        
+        /* Style for the detailed error message */
+        #error-details {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #ff5555;
+            background: rgba(255,0,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            word-wrap: break-word;
+            text-align: left;
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="spinner"></div>
-        <div>🔮 Haluweb is shifting dimensions...<br><span style="font-size: 14px; color: #888;">Generating a deeply ridiculous website...</span></div>
+        <div class="spinner" id="spinny-thing"></div>
+        <div id="status-text">🔮 Haluweb is shifting dimensions...<br><span style="font-size: 14px; color: #888;">Generating a deeply ridiculous website...</span></div>
+        <div id="error-details"></div>
     </div>
     
     <div id="website-container"></div>
@@ -58,9 +75,6 @@
         Generate a single, complete HTML page (including full layout and embedded CSS styling inside a <style> tag). 
         
         The website must look like an absurd business, a fake unhinged startup, a bizarre hobbyist blog, or a local service from an alternate universe. 
-        Examples of vibes: A company that rents aggressive geese for corporate security, a luxury artisanal water bar that only sells moisture collected from air conditioners, a support group for people who suspect their cat is plotting a corporate takeover.
-        
-        Make the copy incredibly funny, satirical, and strange. Add fake menus, pricing tables, testimonials from confused customers, and features. Ensure it has good layout structure and colors so it looks like a real (but crazy) website.
         
         Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html). Start directly with HTML elements or a container. Do not write any explanations outside the HTML code.
         `;
@@ -71,13 +85,13 @@
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        // Adding these headers helps OpenRouter identify frontend requests
+                        "HTTP-Referer": "https://pasterpo.github.io/HaluWeb/", 
+                        "X-Title": "HaluWeb"
                     },
                     body: JSON.stringify({
-                        "models": [
-                            "meta-llama/llama-3.1-8b-instruct:free",
-                            "google/gemini-2.5-flash-lite:free"
-                        ],
+                        "model": "google/gemini-2.5-flash-lite", // Forcing Gemini first as it often has higher free limits
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
                             { "role": "user", "content": "Invent a hilarious and completely random new website layout and concept right now." }
@@ -85,32 +99,38 @@
                     })
                 });
 
+                // Check if the response is actually OK before trying to parse the JSON
+                if (!response.ok) {
+                    const errorText = await response.text(); // Read the raw error from OpenRouter
+                    throw new Error(`OpenRouter Error ${response.status}: ${errorText}`);
+                }
+
                 const data = await response.json();
                 
                 if (!data.choices || data.choices.length === 0) {
-                    throw new Error("No response from AI model.");
+                    throw new Error("API responded, but returned no choices.");
                 }
 
                 let aiHtml = data.choices[0].message.content;
-
-                // Clean up any accidental markdown blocks if the AI ignored instructions
                 aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
 
-                // Remove the loader and inject the website
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('website-container').innerHTML = aiHtml;
                 
-                // Set the browser tab title automatically
                 const aiTitle = document.querySelector("#website-container title");
-                if (aiTitle) {
-                    document.title = aiTitle.innerText;
-                } else {
-                    document.title = "Haluweb - Generated Reality";
-                }
+                if (aiTitle) document.title = aiTitle.innerText;
 
             } catch (error) {
-                console.error(error);
-                document.getElementById('loader').innerHTML = "🛑 The reality portal collapsed! OpenRouter might be rate-limiting the free tier right now. Refresh to try again!";
+                console.error("Full Error:", error);
+                
+                // Update UI to show the error
+                document.getElementById('spinny-thing').style.display = 'none';
+                document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
+                
+                const errorDiv = document.getElementById('error-details');
+                errorDiv.style.display = 'block';
+                // Show exactly what the error is
+                errorDiv.innerText = "Technical details: " + error.message;
             }
         }
 
