@@ -10,21 +10,41 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow-x: hidden;
-            background: #0f0f16; /* Fallback background */
+            background: #0d0d13;
+            font-family: system-ui, -apple-system, sans-serif;
         }
+        
+        /* This wrapper guarantees the generated website is ALWAYS perfectly centered */
+        #main-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        #website-container {
+            width: 100%;
+            max-width: 800px; /* Keeps the page tightly grouped and beautifully centered */
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: none; /* Hidden until loaded */
+        }
+
         #loader {
-            font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             font-size: 22px;
-            background: #0f0f16;
             color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
             text-align: center;
-            padding: 20px;
         }
         .spinner {
             border: 4px solid rgba(0,255,204,0.1);
@@ -36,13 +56,6 @@
             margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #website-container {
-            width: 100%;
-            height: 100%;
-            background: white; /* Ensure generated content has a background */
-        }
-        
-        /* Style for the detailed error message */
         #error-details {
             margin-top: 20px;
             font-size: 14px;
@@ -50,9 +63,6 @@
             background: rgba(255,0,0,0.1);
             padding: 10px;
             border-radius: 5px;
-            max-width: 80%;
-            word-wrap: break-word;
-            text-align: left;
             display: none;
         }
     </style>
@@ -60,23 +70,37 @@
 <body>
 
     <div id="loader">
-        <div class="spinner" id="spinny-thing"></div>
-        <div id="status-text">🔮 Haluweb is shifting dimensions...<br><span style="font-size: 14px; color: #888;">Generating a deeply ridiculous website...</span></div>
+        <div class="spinner"></div>
+        <div id="status-text">🔮 Shifting dimensions...<br><span style="font-size: 14px; color: #888;">Harvesting peak internet chaos...</span></div>
         <div id="error-details"></div>
     </div>
     
-    <div id="website-container"></div>
+    <div id="main-wrapper">
+        <div id="website-container"></div>
+    </div>
 
     <script>
+        // Your working API key
         const OPENROUTER_API_KEY = "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";
 
         const SYSTEM_PROMPT = `
-        You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre, and funny single-page websites. 
-        Generate a single, complete HTML page (including full layout and embedded CSS styling inside a <style> tag). 
+        You are Haluweb, a chaotic, deeply satirical AI that invents completely fake, bizarre single-page websites.
         
-        The website must look like an absurd business, a fake unhinged startup, a bizarre hobbyist blog, or a local service from an alternate universe. 
+        CRITICAL LAYOUT RULES:
+        1. Do not include <html>, <head>, or <body> tags. Output ONLY the inner HTML content.
+        2. Everything you generate must be wrapped inside a clean, modern container div.
+        3. Use beautiful, modern CSS inside a <style> tag. Use flexbox or grid to ensure text and columns are perfectly aligned, spaced, and visually striking.
+        4. If you include images (<img src="...">), use high-quality, completely random placeholders from "https://images.unsplash.com/photo-..." or similar real, live URLs so they don't look broken.
+
+        PEAK HUMOR & BUTTON LOGIC RULES:
+        1. Invent an unhinged concept (e.g., an insurance agency for when you wake up as a beetle, a subscription service that sends an actor to argue with your landlord, a luxury store selling customized rocks that whisper insults).
+        2. EVERY single button, link, or input form MUST have hilarious inline JavaScript logic attached to it via 'onclick' or custom scripts. 
+        3. Clicking a button should NOT redirect the page. Instead, it must trigger funny alert boxes, modify the page text dynamically, launch a fake popup, play a prank, or make elements disappear.
+           - Example 1: Clicking 'Buy Now' triggers an alert: "Transaction failed. Your bank account has been replaced with 400 lbs of loose gravel. Check your front porch."
+           - Example 2: Clicking 'Submit' changes the main header text to "YOU HAVE AWOKEN THE ANCIENT ONE."
+           - Example 3: Make a button that literally flies away or shrinks when clicked.
         
-        Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html). Start directly with HTML elements or a container. Do not write any explanations outside the HTML code.
+        Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html).
         `;
 
         async function generateHaluweb() {
@@ -86,50 +110,45 @@
                     headers: {
                         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                         "Content-Type": "application/json",
-                        // Adding these headers helps OpenRouter identify frontend requests
                         "HTTP-Referer": "https://pasterpo.github.io/HaluWeb/", 
                         "X-Title": "HaluWeb"
                     },
                     body: JSON.stringify({
-                        "model": "google/gemini-2.5-flash-lite", // Forcing Gemini first as it often has higher free limits
+                        "model": "google/gemini-2.5-flash-lite",
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Invent a hilarious and completely random new website layout and concept right now." }
+                            { "role": "user", "content": "Generate a beautiful, perfectly-aligned, peak-humor page with fully working chaotic buttons." }
                         ]
                     })
                 });
 
-                // Check if the response is actually OK before trying to parse the JSON
                 if (!response.ok) {
-                    const errorText = await response.text(); // Read the raw error from OpenRouter
+                    const errorText = await response.text();
                     throw new Error(`OpenRouter Error ${response.status}: ${errorText}`);
                 }
 
                 const data = await response.json();
-                
-                if (!data.choices || data.choices.length === 0) {
-                    throw new Error("API responded, but returned no choices.");
-                }
-
                 let aiHtml = data.choices[0].message.content;
+
+                // Clean up markdown blocks if the model slipped up
                 aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
 
+                // Inject and display
                 document.getElementById('loader').style.display = 'none';
-                document.getElementById('website-container').innerHTML = aiHtml;
+                const container = document.getElementById('website-container');
+                container.innerHTML = aiHtml;
+                container.style.display = 'block';
                 
-                const aiTitle = document.querySelector("#website-container title");
-                if (aiTitle) document.title = aiTitle.innerText;
+                // Dynamically update title if the AI provided one
+                const aiTitle = container.querySelector("title, h1");
+                if (aiTitle) document.title = "Haluweb - " + aiTitle.innerText.substring(0, 30);
 
             } catch (error) {
-                console.error("Full Error:", error);
-                
-                // Update UI to show the error
-                document.getElementById('spinny-thing').style.display = 'none';
+                console.error(error);
+                document.getElementById('loader').querySelector('.spinner').style.display = 'none';
                 document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
-                
                 const errorDiv = document.getElementById('error-details');
                 errorDiv.style.display = 'block';
-                // Show exactly what the error is
                 errorDiv.innerText = "Technical details: " + error.message;
             }
         }
