@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Full Experience</title>
+    <title>Haluweb - App Layout</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; background: #0f0f16; font-family: sans-serif; color: #fff; }
+        body, html { margin: 0; padding: 0; background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; }
         #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0f0; }
         .spinner { border: 4px solid #111; width: 40px; height: 40px; border-radius: 50%; border-top-color: #0f0; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* This wrapper fixes the "baby website" look */
-        .page-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; background: white; color: #333; min-height: 100vh; }
-        
-        #error-box { display: none; padding: 20px; color: #f00; }
+        /* Forces the AI to keep content contained and app-like */
         #website-container { width: 100%; display: none; }
     </style>
 </head>
 <body>
     <div id="loader">
         <div class="spinner"></div>
-        <p>Forging a real website (2000 token limit)...</p>
-        <div id="error-box"></div>
+        <p>Architecting web UI (2000 token limit)...</p>
     </div>
     <div id="website-container"></div>
 
@@ -29,19 +25,21 @@
         let key = localStorage.getItem("haluweb_key");
         if (!key) { key = prompt("API Key:"); localStorage.setItem("haluweb_key", key); }
 
-        // The SYSTEM_PROMPT now forces a layout wrapper
+        // UPDATED: Now forces specific UI components instead of blog text
         const SYSTEM_PROMPT = `
-        You are Haluweb. Generate a bizarre, unhinged, long-scrolling website.
+        You are a chaotic Frontend Web Developer. Build a single-page web app.
         
-        CRITICAL RULES:
-        1. WRAP ALL CONTENT in a single <div class="page-wrapper">...</div>.
-        2. Content: You must write extensive text, lore, or fake news. No just-image-lists.
-        3. Use CSS Grid or Flexbox inside the wrapper to make it look professional, not basic.
-        4. Use picsum.photos for images. 
-        5. Every button must have a prank 'onclick' alert.
-        6. Make the page very long (scrollable).
+        STRUCTURE REQUIREMENTS:
+        1. NO LONG ARTICLES. You must use UI components:
+           - Navbar (with fake links)
+           - Hero Section (Title + CTA Button)
+           - Feature Grid (Cards with icons/images)
+           - A Footer with fake links
+        2. INTERACTIVITY: Every button MUST trigger a JavaScript alert('PRANK'). 
+        3. DESIGN: Dark-mode theme, glassmorphism effects, flexbox/grid only.
+        4. IMAGES: Use picsum.photos for all placeholder images.
         
-        Output raw HTML only. No markdown.
+        Output raw HTML/CSS only. No markdown.
         `;
 
         async function generate() {
@@ -51,10 +49,10 @@
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         "model": "google/gemini-2.5-flash-lite", 
-                        "max_tokens": 2000, // <--- Bumping to 2000 tokens for real length
+                        "max_tokens": 2000, 
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Create a long, hilarious, high-quality, satirical website." }
+                            { "role": "user", "content": "Build a modern, dark-mode web app landing page." }
                         ]
                     })
                 });
@@ -66,8 +64,7 @@
                 cont.innerHTML = html;
                 cont.style.display = 'block';
             } catch (err) {
-                document.getElementById('error-box').style.display = 'block';
-                document.getElementById('error-box').innerText = err.message;
+                alert("Generation failed: " + err.message);
             }
         }
         generate();
