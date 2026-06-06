@@ -16,13 +16,10 @@
     <div id="website-container"></div>
 
     <script>
-        // 1. GLOBAL ERROR CATCHER: If anything crashes, it prints to screen
+        // GLOBAL ERROR CATCHER
         window.onerror = function(msg, url, line) {
             document.getElementById('msg').innerHTML = `<p class="error-red">CRITICAL JS ERROR:</p><p>${msg}</p><p>Line: ${line}</p>`;
         };
-
-        console.log("Script starting...");
-        document.getElementById('msg').innerText = "Script started. Checking API Key...";
 
         let key = localStorage.getItem("haluweb_key");
         if (!key) { 
@@ -60,12 +57,11 @@
                 if(!response.ok) throw new Error("HTTP Error: " + response.status);
 
                 const data = await response.json();
-                console.log("Response received:", data);
                 
                 if(!data.choices || !data.choices[0].message.content) throw new Error("AI returned empty data.");
 
-                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/
-```/g, "").trim();
+                // FIXED: Everything is on one line now
+                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/```/g, "").trim();
                 
                 document.getElementById('status-display').style.display = 'none';
                 const cont = document.getElementById('website-container');
