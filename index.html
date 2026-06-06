@@ -2,21 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Debug Mode</title>
+    <title>Haluweb - Final Build</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; background: #000; color: #fff; font-family: sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; background: #050505; color: #fff; font-family: sans-serif; }
         #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0f0; }
         .spinner { border: 4px solid #111; width: 40px; height: 40px; border-radius: 50%; border-top-color: #0f0; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #website-container { width: 100%; display: none; }
-        .debug-error { padding: 20px; color: #f00; font-family: monospace; }
     </style>
 </head>
 <body>
     <div id="loader">
         <div class="spinner"></div>
-        <p>Forging reality (Check Console if blank)...</p>
+        <p>Architecting Reality (15s Timeout)...</p>
     </div>
     <div id="website-container"></div>
 
@@ -25,49 +23,45 @@
         if (!key) { key = prompt("API Key:"); localStorage.setItem("haluweb_key", key); }
 
         const SYSTEM_PROMPT = `
-        You are a Frontend Developer. Generate a full, working HTML/CSS website.
+        You are a Frontend Developer. Build a single-page web app.
         
-        CRITICAL RULES:
-        1. MUST start with <html><body> and end with </body></html> tags.
-        2. DO NOT use markdown. Return PURE HTML string only.
-        3. All content must be inside a <div class="page-wrapper">...</div>.
-        4. Every button must have a hilarious 'onclick' alert.
+        STRUCTURE RULES:
+        1. DO NOT WRITE ARTICLES. Use semantic tags: <header>, <nav>, <main>, <section>, <footer>.
+        2. UI: Use CSS Grid/Flexbox for a dashboard/app layout. 
+        3. INTERACTIVE: Every button must trigger: alert('PRANK').
+        4. DESIGN: Dark-mode, glassmorphism, rounded cards.
+        5. IMAGES: Use picsum.photos for all images.
         `;
 
         async function generate() {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000); // 15s Kill Switch
+
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
+                    signal: controller.signal,
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         "model": "google/gemini-2.5-flash-lite", 
-                        "max_tokens": 2000, 
+                        "max_tokens": 1500, 
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Create a hilarious, long-scrolling dark-mode web app landing page." }
+                            { "role": "user", "content": "Build a dark-mode web app landing page with a hero section and feature cards." }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                console.log("AI Response received:", data); // DEBUG LINE
-
-                if(!data.choices || !data.choices[0].message.content) {
-                    throw new Error("AI returned empty content");
-                }
-
-                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/
-```/g, "").trim();
+                clearTimeout(timeout);
                 
-                // Final sanity check: force visibility
+                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/```/g, "").trim();
+                document.getElementById('loader').style.display = 'none';
                 const cont = document.getElementById('website-container');
                 cont.innerHTML = html;
                 cont.style.display = 'block';
-                document.getElementById('loader').style.display = 'none';
-                
             } catch (err) {
-                console.error("DEBUG ERROR:", err);
-                document.body.innerHTML = `<div class="debug-error"><h1>FAILED</h1><p>${err.message}</p><p>Check the Console (F12) for details!</p></div>`;
+                document.body.innerHTML = `<h1>Error</h1><p>${err.message}</p><button onclick="location.reload()">Retry</button>`;
             }
         }
         generate();
