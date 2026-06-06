@@ -1,140 +1,2031 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Loading Reality...</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            background: #0f0f16; /* Fallback background */
-        }
-        #loader {
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 22px;
-            background: #0f0f16;
-            color: #00ffcc;
-            text-align: center;
-            padding: 20px;
-        }
-        .spinner {
-            border: 4px solid rgba(0,255,204,0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border-left-color: #00ffcc;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #website-container {
-            width: 100%;
-            height: 100%;
-            background: white; /* Ensure generated content has a background */
-        }
-        
-        /* Style for the detailed error message */
-        #error-details {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #ff5555;
-            background: rgba(255,0,0,0.1);
-            padding: 10px;
-            border-radius: 5px;
-            max-width: 80%;
-            word-wrap: break-word;
-            text-align: left;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaluWeb – The Internet's Fever Dream</title>
+  <meta name="description" content="An ever-growing archive of AI-hallucinated websites. Businesses, blogs, and services from an alternate universe." />
+  <meta property="og:title" content="HaluWeb – The Internet's Fever Dream" />
+  <meta property="og:description" content="AI-generated fake websites. Infinitely weird. Forever growing." />
+  <meta property="og:image" content="https://haluweb.com/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --accent3: #f59e0b;
+      --text: #e8e8f0;
+      --muted: #6b6b8a;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius: 12px;
+      --nav-h: 58px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, textarea { font-family: inherit; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(12,12,15,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+      gap: 12px;
+    }
+
+    #nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: nowrap;
+    }
+
+    .nav-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 13px;
+      border-radius: 8px;
+      color: var(--muted);
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { color: var(--text); background: var(--surface2); }
+    .nav-btn.active { color: var(--text); background: var(--surface2); }
+
+    #btn-generate-nav {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    #btn-generate-nav:hover { background: #6d28d9; transform: translateY(-1px); }
+
+    #btn-stumble-nav {
+      background: var(--accent3);
+      color: #000 !important;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    #btn-stumble-nav:hover { background: #d97706; transform: translateY(-1px); }
+
+    #nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .nav-external {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: all 0.18s;
+    }
+    .nav-external:hover { color: var(--text); border-color: var(--accent); }
+    .nav-external.reddit:hover { color: #ff4500; border-color: #ff4500; }
+    .nav-external.discord:hover { color: #5865f2; border-color: #5865f2; }
+
+    /* ── MAIN CONTENT WRAPPER ── */
+    #app {
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HOME PAGE ── */
+    #page-home {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    #hero {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    #hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 20px;
+    }
+
+    #hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 8vw, 80px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+    }
+
+    #hero h1 .grad {
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+
+    #hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 14px 28px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: #6d28d9; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,58,237,0.35); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .btn-amber {
+      background: var(--accent3);
+      color: #000;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 14px 28px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-amber:hover { background: #d97706; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(245,158,11,0.3); }
+
+    /* ── STATS BAR ── */
+    #stats-bar {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 60px;
+      background: var(--surface);
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent2);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    /* ── HOME GRID ── */
+    #home-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      #home-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .section-more {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .section-more:hover { opacity: 0.7; }
+
+    /* ── SITE CARDS ── */
+    .sites-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .site-card:hover { border-color: var(--accent); transform: translateX(4px); }
+
+    .site-card-rank {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 24px;
+      padding-top: 2px;
+    }
+
+    .site-card-body { flex: 1; min-width: 0; }
+
+    .site-card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .site-card-slug {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--accent2);
+      letter-spacing: 0.05em;
+    }
+
+    .site-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .site-card-views {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .site-card-votes {
+      font-size: 11px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .site-card-upvote {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .site-card-upvote:hover { border-color: var(--success); color: var(--success); }
+    .site-card-upvote.voted { background: rgba(34,197,94,0.1); border-color: var(--success); color: var(--success); }
+
+    /* ── LEADERBOARD SIDEBAR ── */
+    #sidebar { display: flex; flex-direction: column; gap: 24px; }
+
+    .sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .sidebar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .leaderboard-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .leaderboard-item:hover { opacity: 0.75; }
+
+    .lb-rank {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 20px;
+    }
+    .lb-rank.gold { color: #f59e0b; font-weight: 700; }
+    .lb-rank.silver { color: #94a3b8; font-weight: 700; }
+    .lb-rank.bronze { color: #b45309; font-weight: 700; }
+
+    .lb-title {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lb-score {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent3);
+    }
+
+    /* ── GENERATE PAGE ── */
+    #page-generate {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    #gen-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    #gen-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    #gen-header p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    #gen-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--accent); }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .theme-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .theme-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .theme-chip:hover, .theme-chip.selected {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124,58,237,0.1);
+    }
+
+    #btn-generate-main {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 16px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    #btn-generate-main:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,58,237,0.4); }
+    #btn-generate-main:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── LOADING STATE ── */
+    #gen-loading {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 32px;
+    }
+
+    .loader-ring {
+      width: 56px;
+      height: 56px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    #loading-subtext {
+      font-size: 12px;
+      color: var(--border);
+      margin-top: 6px;
+    }
+
+    /* ── RESULT AREA ── */
+    #gen-result { display: none; }
+
+    #result-meta {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #result-title-display {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      flex: 1;
+    }
+
+    #result-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .result-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .result-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .result-btn.share { border-color: var(--accent3); color: var(--accent3); }
+    .result-btn.share:hover { background: rgba(245,158,11,0.1); }
+
+    #result-frame-wrapper {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      height: 600px;
+      background: #fff;
+      position: relative;
+    }
+
+    #result-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ── BROWSE PAGE ── */
+    #page-browse {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    #browse-header {
+      margin-bottom: 40px;
+    }
+
+    #browse-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    #browse-header p { color: var(--muted); }
+
+    #browse-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    #search-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+
+    .sort-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .sort-btn:hover, .sort-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(124,58,237,0.08); }
+
+    #browse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .browse-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .browse-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+    .browse-card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .browse-card-slug {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--accent2);
+    }
+
+    .browse-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .browse-card-stats {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .browse-card-upvote {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      transition: all 0.15s;
+    }
+    .browse-card-upvote:hover { border-color: var(--success); color: var(--success); }
+    .browse-card-upvote.voted { background: rgba(34,197,94,0.1); border-color: var(--success); color: var(--success); }
+
+    #browse-load-more {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    /* ── SITE VIEW PAGE ── */
+    #page-site {
+      height: calc(100vh - var(--nav-h));
+      display: none;
+      flex-direction: column;
+    }
+    #page-site.active { display: flex; }
+
+    #site-toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    #site-toolbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #site-toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .toolbar-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 7px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .toolbar-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .toolbar-btn.upvoted { border-color: var(--success); color: var(--success); background: rgba(34,197,94,0.1); }
+
+    #site-iframe {
+      flex: 1;
+      border: none;
+      background: #fff;
+      width: 100%;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-family: 'Space Mono', monospace;
+      z-index: 9999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-color: var(--success); color: var(--success); }
+    #toast.error { border-color: var(--danger); color: var(--danger); }
+    #toast.info { border-color: var(--accent2); color: var(--accent2); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .empty-state p { font-size: 14px; }
+
+    /* ── LOADING SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── ABOUT / TOKENS ── */
+    #page-about {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    #page-about h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    #page-about p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .donate-box {
+      background: var(--surface);
+      border: 1px solid var(--accent3);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .donate-box h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent3);
+      margin-bottom: 8px;
+    }
+
+    .donate-box p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── MOBILE NAV ── */
+    #mobile-nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      cursor: pointer;
+    }
+    #mobile-nav-toggle span {
+      width: 22px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      top: var(--nav-h);
+      left: 0; right: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      z-index: 999;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #mobile-menu.open { display: flex; }
+
+    .mobile-nav-btn {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .mobile-nav-btn:hover { background: var(--surface2); }
+
+    @media (max-width: 768px) {
+      #nav-links { display: none; }
+      #nav-right { display: none; }
+      #mobile-nav-toggle { display: flex; }
+
+      #browse-grid { grid-template-columns: 1fr; }
+
+      #stats-bar { flex-direction: column; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+
+      #result-meta { flex-direction: column; align-items: flex-start; }
+
+      #home-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── CONFIG NOTICE ── */
+    #config-notice {
+      display: none;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid var(--accent3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--accent3);
+      font-family: 'Space Mono', monospace;
+    }
+    #config-notice.show { display: block; }
+
+    /* ── FOOTER ── */
+    #footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+    #footer a { color: var(--accent2); }
+  </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner" id="spinny-thing"></div>
-        <div id="status-text">🔮 Haluweb is shifting dimensions...<br><span style="font-size: 14px; color: #888;">Generating a deeply ridiculous website...</span></div>
-        <div id="error-details"></div>
+<!-- ═══════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div id="nav-logo" onclick="showPage('home')">HaluWeb</div>
+
+  <div id="nav-links">
+    <button class="nav-btn" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" onclick="showPage('browse')">All Sites</button>
+    <button id="btn-stumble-nav" onclick="stumble()">⚡ Stumble</button>
+    <button id="btn-generate-nav" onclick="showPage('generate')">+ Generate</button>
+  </div>
+
+  <div id="nav-right">
+    <a href="https://reddit.com/r/haluweb" target="_blank" class="nav-external reddit">Reddit</a>
+    <a href="https://discord.gg/haluweb" target="_blank" class="nav-external discord">Discord</a>
+    <button class="nav-external" onclick="showPage('about')">Buy Tokens ☕</button>
+  </div>
+
+  <!-- Mobile toggle -->
+  <button id="mobile-nav-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+  <button class="mobile-nav-btn" onclick="showPage('home'); closeMobileMenu()">🏠 Home</button>
+  <button class="mobile-nav-btn" onclick="showPage('browse'); closeMobileMenu()">📚 All Sites</button>
+  <button class="mobile-nav-btn" onclick="stumble(); closeMobileMenu()">⚡ Stumble</button>
+  <button class="mobile-nav-btn" onclick="showPage('generate'); closeMobileMenu()">✨ Generate</button>
+  <button class="mobile-nav-btn" onclick="showPage('about'); closeMobileMenu()">☕ Buy Tokens</button>
+  <a href="https://reddit.com/r/haluweb" target="_blank" class="mobile-nav-btn">Reddit</a>
+  <a href="https://discord.gg/haluweb" target="_blank" class="mobile-nav-btn">Discord</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     APP
+════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── HOME PAGE ── -->
+  <div id="page-home" class="page active">
+    <div style="max-width:1100px;margin:0 auto;padding:60px 24px 80px;">
+
+      <div id="config-notice">
+        ⚠️ Configure your Supabase URL & API key + OpenRouter key in the CONFIG section at the top of the JS.
+      </div>
+
+      <!-- Hero -->
+      <div id="hero">
+        <div id="hero-eyebrow">The Internet's Fever Dream</div>
+        <h1>Websites from<br/><span class="grad">another dimension</span></h1>
+        <p id="hero-sub">An ever-growing archive of AI-hallucinated businesses, blogs, and services. Every generation adds to the database forever.</p>
+        <div id="hero-actions">
+          <button class="btn-primary" onclick="showPage('generate')">✨ Generate a Site</button>
+          <button class="btn-amber" onclick="stumble()">⚡ Stumble</button>
+          <button class="btn-secondary" onclick="showPage('browse')">📚 Browse Archive</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div id="stats-bar">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">Sites Generated</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-today">—</div>
+          <div class="stat-label">Generated Today</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-votes">—</div>
+          <div class="stat-label">Total Upvotes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-views">—</div>
+          <div class="stat-label">Total Views</div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div id="home-grid">
+        <!-- Recent Sites -->
+        <div>
+          <div class="section-header">
+            <div class="section-title">🆕 Recently Generated</div>
+            <div class="section-more" onclick="showPage('browse')">View all →</div>
+          </div>
+          <div class="sites-list" id="recent-list">
+            <!-- filled by JS -->
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar">
+          <div class="sidebar-card">
+            <div class="sidebar-title">🏆 Top of All Time</div>
+            <div id="leaderboard-list"></div>
+          </div>
+
+          <div class="sidebar-card">
+            <div class="sidebar-title">🔥 Today's Best</div>
+            <div id="today-list"></div>
+          </div>
+
+          <div class="sidebar-card" style="text-align:center;">
+            <div class="sidebar-title" style="color:var(--accent3);">☕ Keep It Running</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">AI tokens cost money. If HaluWeb made you laugh, consider buying us tokens.</p>
+            <button class="btn-amber" onclick="showPage('about')" style="width:100%;justify-content:center;">Buy Tokens</button>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <div id="website-container"></div>
+  </div>
 
-    <script>
-        const OPENROUTER_API_KEY = "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";
+  <!-- ── GENERATE PAGE ── -->
+  <div id="page-generate" class="page">
+    <div id="page-generate-inner" style="max-width:800px;margin:0 auto;padding:60px 24px 80px;">
 
-        const SYSTEM_PROMPT = `
-        You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre, and funny single-page websites. 
-        Generate a single, complete HTML page (including full layout and embedded CSS styling inside a <style> tag). 
-        
-        The website must look like an absurd business, a fake unhinged startup, a bizarre hobbyist blog, or a local service from an alternate universe. 
-        
-        Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html). Start directly with HTML elements or a container. Do not write any explanations outside the HTML code.
-        `;
+      <div id="gen-header">
+        <h2>✨ Generate a Site</h2>
+        <p>Describe a theme, or leave blank for pure chaos.</p>
+      </div>
 
-        async function generateHaluweb() {
-            try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json",
-                        // Adding these headers helps OpenRouter identify frontend requests
-                        "HTTP-Referer": "https://pasterpo.github.io/HaluWeb/", 
-                        "X-Title": "HaluWeb"
-                    },
-                    body: JSON.stringify({
-                        "model": "google/gemini-2.5-flash-lite", // Forcing Gemini first as it often has higher free limits
-                        "messages": [
-                            { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Invent a hilarious and completely random new website layout and concept right now." }
-                        ]
-                    })
-                });
+      <!-- Form -->
+      <div id="gen-form">
+        <div class="form-group">
+          <label class="form-label" for="gen-topic">Topic / Theme (optional)</label>
+          <input type="text" id="gen-topic" class="form-input"
+            placeholder="e.g. medieval plumbing, cats in space, interdimensional bakery…"
+            maxlength="100" />
+          <div class="form-hint">Leave blank for a completely random site.</div>
+        </div>
 
-                // Check if the response is actually OK before trying to parse the JSON
-                if (!response.ok) {
-                    const errorText = await response.text(); // Read the raw error from OpenRouter
-                    throw new Error(`OpenRouter Error ${response.status}: ${errorText}`);
-                }
+        <div class="form-group">
+          <label class="form-label">Quick Themes</label>
+          <div class="theme-chips" id="theme-chips">
+            <span class="theme-chip" onclick="selectChip(this, 'medieval business')">⚔️ Medieval</span>
+            <span class="theme-chip" onclick="selectChip(this, 'sci-fi startup')">🚀 Sci-Fi</span>
+            <span class="theme-chip" onclick="selectChip(this, 'supernatural service')">👻 Supernatural</span>
+            <span class="theme-chip" onclick="selectChip(this, 'underwater civilization')">🌊 Underwater</span>
+            <span class="theme-chip" onclick="selectChip(this, 'time travel agency')">⏰ Time Travel</span>
+            <span class="theme-chip" onclick="selectChip(this, 'alien fast food')">👽 Alien</span>
+            <span class="theme-chip" onclick="selectChip(this, 'wizard tech company')">🧙 Wizard Tech</span>
+            <span class="theme-chip" onclick="selectChip(this, 'dinosaur services')">🦕 Dinosaur</span>
+            <span class="theme-chip" onclick="selectChip(this, 'robot therapy')">🤖 Robot</span>
+            <span class="theme-chip" onclick="selectChip(this, 'haunted real estate')">🏚️ Haunted</span>
+          </div>
+        </div>
 
-                const data = await response.json();
-                
-                if (!data.choices || data.choices.length === 0) {
-                    throw new Error("API responded, but returned no choices.");
-                }
+        <button id="btn-generate-main" onclick="generateSite()">
+          <span id="gen-btn-text">✨ Generate Website</span>
+        </button>
+      </div>
 
-                let aiHtml = data.choices[0].message.content;
-                aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
+      <!-- Loading -->
+      <div id="gen-loading">
+        <div class="loader-ring"></div>
+        <div id="loading-text">Shifting dimensions…</div>
+        <div id="loading-subtext">Generating your deeply ridiculous website…</div>
+      </div>
 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('website-container').innerHTML = aiHtml;
-                
-                const aiTitle = document.querySelector("#website-container title");
-                if (aiTitle) document.title = aiTitle.innerText;
+      <!-- Result -->
+      <div id="gen-result">
+        <div id="result-meta">
+          <div id="result-title-display">—</div>
+          <div id="result-actions">
+            <button class="result-btn share" onclick="shareCurrentSite()">🔗 Share</button>
+            <button class="result-btn" onclick="copyPermalink()">📋 Copy Link</button>
+            <button class="result-btn" onclick="generateSite()">🔄 Generate Another</button>
+          </div>
+        </div>
+        <div id="result-frame-wrapper">
+          <iframe id="result-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+      </div>
 
-            } catch (error) {
-                console.error("Full Error:", error);
-                
-                // Update UI to show the error
-                document.getElementById('spinny-thing').style.display = 'none';
-                document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
-                
-                const errorDiv = document.getElementById('error-details');
-                errorDiv.style.display = 'block';
-                // Show exactly what the error is
-                errorDiv.innerText = "Technical details: " + error.message;
-            }
-        }
+    </div>
+  </div>
 
-        generateHaluweb();
-    </script>
+  <!-- ── BROWSE PAGE ── -->
+  <div id="page-browse" class="page">
+    <div style="max-width:1100px;margin:0 auto;padding:60px 24px 80px;">
+
+      <div id="browse-header">
+        <h2>📚 All Sites</h2>
+        <p>The complete archive. Every hallucinated website ever generated.</p>
+      </div>
+
+      <div id="browse-controls">
+        <input type="text" id="search-input" placeholder="Search sites…" oninput="handleSearch()" />
+        <button class="sort-btn active" id="sort-new" onclick="setSort('new')">Newest</button>
+        <button class="sort-btn" id="sort-top" onclick="setSort('top')">Top Voted</button>
+        <button class="sort-btn" id="sort-views" onclick="setSort('views')">Most Viewed</button>
+      </div>
+
+      <div id="browse-grid"></div>
+
+      <div id="browse-load-more">
+        <button class="btn-secondary" id="load-more-btn" onclick="loadMoreSites()" style="display:none;">Load More</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SITE VIEW PAGE ── -->
+  <div id="page-site" class="page">
+    <div id="site-toolbar">
+      <button class="toolbar-btn" onclick="goBack()">← Back</button>
+      <div id="site-toolbar-title">—</div>
+      <div id="site-toolbar-actions">
+        <button class="toolbar-btn" id="toolbar-upvote" onclick="upvoteCurrentSite()">▲ <span id="toolbar-vote-count">0</span></button>
+        <button class="toolbar-btn" onclick="shareCurrentSite()">🔗 Share</button>
+        <button class="toolbar-btn" onclick="copyPermalink()">📋 Copy Link</button>
+        <button class="btn-amber" onclick="showPage('generate')" style="font-size:11px;padding:7px 14px;border-radius:7px;">+ Generate</button>
+      </div>
+    </div>
+    <iframe id="site-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+
+  <!-- ── ABOUT PAGE ── -->
+  <div id="page-about" class="page">
+    <div style="max-width:700px;margin:0 auto;padding:60px 24px 80px;">
+      <h2>About HaluWeb</h2>
+      <p>HaluWeb is an ever-growing archive of AI-hallucinated websites. Every time you click Generate, the AI invents a completely fake business, blog, or service from an alternate universe — and it gets saved to the database forever.</p>
+      <p>Browse thousands of absurd fake websites. Use the Stumble button to discover something random. Vote for your favourites. Share the weirdest ones with your friends.</p>
+      <p>Built with ☕, chaos, and too many API calls.</p>
+
+      <div class="donate-box">
+        <h3>☕ Buy Us Tokens</h3>
+        <p>Every generation costs real AI tokens. If HaluWeb made you laugh, consider keeping it alive.</p>
+        <a href="https://ko-fi.com/haluweb" target="_blank" class="btn-amber" style="display:inline-flex;margin:0 auto;">Support on Ko-fi</a>
+      </div>
+
+      <div style="margin-top:32px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+        <div class="sidebar-title" style="margin-bottom:12px;">🔗 Find Us</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <a href="https://reddit.com/r/haluweb" target="_blank" style="color:var(--accent2);font-family:'Space Mono',monospace;font-size:13px;">Reddit – r/haluweb</a>
+          <a href="https://discord.gg/haluweb" target="_blank" style="color:var(--accent2);font-family:'Space Mono',monospace;font-size:13px;">Discord Community</a>
+          <a href="https://github.com/pasterpo/HaluWeb" target="_blank" style="color:var(--accent2);font-family:'Space Mono',monospace;font-size:13px;">GitHub – Open Source</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #app -->
+
+<!-- Footer -->
+<div id="footer">
+  <p>HaluWeb — <a href="https://github.com/pasterpo/HaluWeb" target="_blank">Open Source</a> · Built with hallucinations · <a href="#" onclick="showPage('about')">Support Us</a></p>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║                    ⚙️  CONFIG                           ║
+// ║  Fill these in before deploying!                        ║
+// ╚══════════════════════════════════════════════════════════╝
+const CONFIG = {
+  // Get free Supabase project at https://supabase.com
+  SUPABASE_URL: 'YOUR_SUPABASE_URL',
+  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+
+  // Your OpenRouter key (https://openrouter.ai)
+  OPENROUTER_API_KEY: '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',
+
+  // AI model to use
+  MODEL: 'google/gemini-2.5-flash-lite',
+
+  // Your site URL (for share links + OpenRouter referer)
+  SITE_URL: 'https://haluweb.com',
+};
+
+// ── SUPABASE INIT ──
+let supabase = null;
+let supabaseReady = false;
+
+function initSupabase() {
+  if (CONFIG.SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    document.getElementById('config-notice').classList.add('show');
+    return false;
+  }
+  try {
+    supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    supabaseReady = true;
+    return true;
+  } catch(e) {
+    console.error('Supabase init failed', e);
+    return false;
+  }
+}
+
+// ── STATE ──
+let currentPage = 'home';
+let currentSiteId = null;
+let currentSiteSlug = null;
+let browseOffset = 0;
+let browseSort = 'new';
+let browseSearchQuery = '';
+let searchTimeout = null;
+let votedSites = JSON.parse(localStorage.getItem('hw_voted') || '[]');
+let lastGeneratedId = null;
+let lastGeneratedSlug = null;
+let previousPage = 'home';
+
+// ── AI SYSTEM PROMPT ──
+const SYSTEM_PROMPT_BASE = `You are HaluWeb, an AI that generates complete, hilarious, fully-designed single-page fake websites.
+
+IMPORTANT RULES:
+1. Output ONLY raw HTML. No markdown, no backticks, no explanation.
+2. The page must be visually polished — use CSS inside a <style> tag.
+3. CRITICAL: Always center the page content. The main content wrapper must use: max-width: 900px; margin: 0 auto; so it looks great on both mobile and desktop.
+4. Include a full layout: header/hero, at least 3 sections (services/products/about/testimonials/etc), and a footer.
+5. Be funny, absurd, and specific. Create fake employee names, fake addresses, fake email addresses, fake phone numbers, fake testimonials, fake prices — all fictional.
+6. The website must look like a REAL website for a completely fake, ridiculous business/service/blog from an alternate universe.
+7. VARIETY IN DESIGN: Every site must look visually different. Rotate through completely different color palettes, layout styles, font feels, and design aesthetics each time. Never reuse the same color scheme or layout structure twice in a row.
+8. Add hover effects, button styles, and visual polish.
+9. The tone should be earnest — the business genuinely believes in its absurd services.
+10. Include fake contact info and a fake footer with copyright year.
+11. No external images (use CSS shapes, emoji, or unicode instead).
+12. After the HTML, on the VERY LAST LINE, write: TITLE: [the website's name/title here]
+
+VARIETY RULES — these are critical:
+- BUSINESS TYPES: Rotate between completely different categories. Examples: grooming services, law firms, restaurants, consulting agencies, museums, travel agencies, delivery services, schools, clinics, real estate, news blogs, online shops, government offices, clubs, charities, sports teams, tech startups, farms, factories, studios, churches, gyms, hotels, libraries, theaters, banks. Never repeat a business type that already exists in the database.
+- THEMES: Rotate between: medieval, sci-fi, underwater, prehistoric, interdimensional, fairy tale, cyberpunk, wild west, ancient civilizations, post-apocalyptic, steampunk, supernatural, pirate, space, jungle, arctic, desert, clockwork, magical realism, corporate dystopia. Never repeat a theme already used.
+- COLOR PALETTES: Each site must use a completely unique color combination. Examples: warm terracotta + cream, neon green + black, pastel pink + navy, blood red + gold, mint + charcoal, electric blue + white, burnt orange + dark brown, lavender + forest green. Never use the same palette twice.
+- LAYOUT STYLES: Rotate between: newspaper style, brutalist, minimalist, maximalist retro, corporate, hand-drawn feel, magazine, government official, old internet (geocities style), luxury brand, playful children's site, horror, academic paper style.
+
+The title line format must be exactly: TITLE: [name]`;
+
+// ── ROUTING ──
+function showPage(page, data = {}) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  if (page !== 'site') previousPage = currentPage;
+  currentPage = page;
+
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+
+  // Nav highlight
+  const navMap = { home: 0, browse: 1 };
+  const navBtns = document.querySelectorAll('.nav-btn');
+  if (navMap[page] !== undefined) navBtns[navMap[page]]?.classList.add('active');
+
+  // Page-specific logic
+  if (page === 'home') {
+    loadHomeData();
+    updateURL('/');
+  } else if (page === 'generate') {
+    updateURL('/generate');
+  } else if (page === 'browse') {
+    browseOffset = 0;
+    browseSearchQuery = '';
+    document.getElementById('search-input').value = '';
+    loadBrowseData();
+    updateURL('/browse');
+  } else if (page === 'site' && data.id) {
+    openSite(data.id, data.slug);
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  showPage(previousPage);
+}
+
+function updateURL(path) {
+  if (window.history && window.history.pushState) {
+    window.history.pushState({}, '', path);
+  }
+}
+
+// ── MOBILE MENU ──
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+}
+
+// ── TOAST ──
+let toastTimeout;
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+// ── GENERATE ──
+// Fetch recent titles from DB to prevent repetition
+async function getRecentTitles() {
+  if (!supabaseReady) return [];
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('title')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    if (error || !data) return [];
+    return data.map(s => s.title);
+  } catch(e) {
+    return [];
+  }
+}
+
+// Build dynamic system prompt with existing titles injected
+function buildSystemPrompt(existingTitles) {
+  let prompt = SYSTEM_PROMPT_BASE;
+  if (existingTitles.length > 0) {
+    prompt += `\n\nALREADY EXISTS IN DATABASE — DO NOT MAKE ANYTHING SIMILAR TO THESE:\n`;
+    prompt += existingTitles.map(t => `- ${t}`).join('\n');
+    prompt += `\n\nYour site must be completely different in concept, theme, business type, color scheme, and layout from all of the above. If any of the above are grooming services, do NOT make another grooming service. If any are medieval themed, do NOT make medieval. Be genuinely original.`;
+  }
+  return prompt;
+}
+
+async function generateSite() {
+  const topic = document.getElementById('gen-topic').value.trim();
+  const btn = document.getElementById('btn-generate-main');
+  const loading = document.getElementById('gen-loading');
+  const result = document.getElementById('gen-result');
+  const form = document.getElementById('gen-form');
+
+  btn.disabled = true;
+  form.style.display = 'none';
+  loading.style.display = 'block';
+  result.style.display = 'none';
+
+  const loadingMessages = [
+    'Shifting dimensions…',
+    'Consulting the chaos oracle…',
+    'Fabricating legal disclaimers…',
+    'Hiring fictional staff…',
+    'Printing imaginary business cards…',
+    'Calibrating the absurdity engine…',
+    'Checking the archive for duplicates…',
+    'Inventing something truly unhinged…',
+  ];
+  let msgIndex = 0;
+  const msgInterval = setInterval(() => {
+    document.getElementById('loading-text').textContent = loadingMessages[msgIndex % loadingMessages.length];
+    msgIndex++;
+  }, 1800);
+
+  try {
+    // Fetch existing titles to avoid repetition
+    const existingTitles = await getRecentTitles();
+    const systemPrompt = buildSystemPrompt(existingTitles);
+
+    const userPrompt = topic
+      ? `Create a hilarious fake website about: ${topic}. Make it specific, funny, and fully designed. It must be completely unlike anything in the existing database.`
+      : 'Invent a completely random, hilarious fake website. Be maximally creative and unexpected. Pick a concept, theme, business type, and visual style that is totally unique.';
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': CONFIG.SITE_URL,
+        'X-Title': 'HaluWeb',
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL,
+        max_tokens: 4000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`API Error ${response.status}: ${err}`);
+    }
+
+    const data = await response.json();
+    if (!data.choices?.length) throw new Error('No response from AI');
+
+    let rawContent = data.choices[0].message.content;
+
+    // Extract title
+    let siteTitle = 'Unnamed Hallucination';
+    const titleMatch = rawContent.match(/TITLE:\s*(.+)$/m);
+    if (titleMatch) {
+      siteTitle = titleMatch[1].trim();
+      rawContent = rawContent.replace(/TITLE:\s*.+$/m, '').trim();
+    }
+
+    // Clean markdown fences
+    let html = rawContent.replace(/```html/g, '').replace(/```/g, '').trim();
+
+    // Generate slug
+    const slug = generateSlug(siteTitle);
+
+    // Show result
+    clearInterval(msgInterval);
+    loading.style.display = 'none';
+    result.style.display = 'block';
+    form.style.display = 'block';
+
+    document.getElementById('result-title-display').textContent = siteTitle;
+    const iframe = document.getElementById('result-frame');
+    iframe.srcdoc = html;
+
+    // Save to DB
+    if (supabaseReady) {
+      const savedId = await saveSiteToDB(siteTitle, slug, html);
+      if (savedId) {
+        lastGeneratedId = savedId;
+        lastGeneratedSlug = slug;
+        updateURL(`/site/${slug}`);
+        showToast('✨ Saved to database!', 'success');
+      }
+    } else {
+      // No DB — just show locally
+      lastGeneratedId = null;
+      lastGeneratedSlug = slug;
+    }
+
+    btn.disabled = false;
+    updateStats();
+
+  } catch (err) {
+    clearInterval(msgInterval);
+    console.error(err);
+    loading.style.display = 'none';
+    form.style.display = 'block';
+    btn.disabled = false;
+    showToast('❌ Generation failed: ' + err.message, 'error');
+  }
+}
+
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .substring(0, 80)
+    + '-' + Math.random().toString(36).substring(2, 7);
+}
+
+async function saveSiteToDB(title, slug, html) {
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .insert([{ title, slug, html, views: 0, votes: 0 }])
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data.id;
+  } catch (e) {
+    console.error('DB save failed:', e);
+    return null;
+  }
+}
+
+function selectChip(el, value) {
+  document.querySelectorAll('.theme-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('gen-topic').value = value;
+}
+
+// ── SHARE ──
+function shareCurrentSite() {
+  const slug = lastGeneratedSlug || currentSiteSlug;
+  if (!slug) { showToast('Generate a site first!', 'error'); return; }
+  const url = `${CONFIG.SITE_URL}/site/${slug}`;
+  if (navigator.share) {
+    navigator.share({ title: 'HaluWeb', text: 'Check out this ridiculous AI website!', url });
+  } else {
+    copyToClipboard(url);
+    showToast('🔗 Link copied!', 'success');
+  }
+}
+
+function copyPermalink() {
+  const slug = lastGeneratedSlug || currentSiteSlug;
+  if (!slug) { showToast('No site to copy!', 'error'); return; }
+  const url = `${CONFIG.SITE_URL}/site/${slug}`;
+  copyToClipboard(url);
+  showToast('📋 Permalink copied!', 'success');
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard?.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+// ── STUMBLE ──
+async function stumble() {
+  if (!supabaseReady) { showPage('generate'); return; }
+  showToast('⚡ Finding something weird…', 'info');
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, slug')
+      .order('random()')
+      .limit(1)
+      .single();
+    if (error || !data) throw error;
+    showPage('site', { id: data.id, slug: data.slug });
+  } catch(e) {
+    showToast('No sites in database yet — generate one!', 'error');
+    showPage('generate');
+  }
+}
+
+// ── OPEN SITE ──
+async function openSite(id, slug) {
+  document.getElementById('site-toolbar-title').textContent = 'Loading…';
+  document.getElementById('site-iframe').srcdoc = '';
+  currentSiteId = id;
+  currentSiteSlug = slug;
+
+  if (!supabaseReady) return;
+
+  try {
+    // Increment views
+    await supabase.rpc('increment_views', { site_id: id });
+
+    const { data, error } = await supabase
+      .from('sites')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) throw error;
+
+    document.getElementById('site-toolbar-title').textContent = data.title;
+    document.getElementById('site-iframe').srcdoc = data.html;
+    document.getElementById('toolbar-vote-count').textContent = data.votes || 0;
+
+    const upvoteBtn = document.getElementById('toolbar-upvote');
+    if (votedSites.includes(id)) {
+      upvoteBtn.classList.add('upvoted');
+    } else {
+      upvoteBtn.classList.remove('upvoted');
+    }
+
+    updateURL(`/site/${slug}`);
+  } catch(e) {
+    console.error(e);
+    showToast('Failed to load site', 'error');
+  }
+}
+
+async function upvoteCurrentSite() {
+  if (!supabaseReady || !currentSiteId) return;
+  if (votedSites.includes(currentSiteId)) {
+    showToast('Already voted!', 'info'); return;
+  }
+  try {
+    await supabase.rpc('increment_votes', { site_id: currentSiteId });
+    votedSites.push(currentSiteId);
+    localStorage.setItem('hw_voted', JSON.stringify(votedSites));
+    const countEl = document.getElementById('toolbar-vote-count');
+    countEl.textContent = parseInt(countEl.textContent || 0) + 1;
+    document.getElementById('toolbar-upvote').classList.add('upvoted');
+    showToast('▲ Upvoted!', 'success');
+  } catch(e) {
+    showToast('Failed to upvote', 'error');
+  }
+}
+
+// ── HOME DATA ──
+async function loadHomeData() {
+  if (!supabaseReady) return;
+  loadRecentSites();
+  loadLeaderboard();
+  loadTodayBest();
+  updateStats();
+}
+
+async function loadRecentSites() {
+  const container = document.getElementById('recent-list');
+  container.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;">Loading…</div>';
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, slug, title, views, votes, created_at')
+      .order('created_at', { ascending: false })
+      .limit(8);
+    if (error) throw error;
+    renderSiteList(container, data, true);
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌀</div><h3>No sites yet</h3><p>Be the first to generate one!</p></div>';
+  }
+}
+
+async function loadLeaderboard() {
+  const container = document.getElementById('leaderboard-list');
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, slug, title, votes')
+      .order('votes', { ascending: false })
+      .limit(5);
+    if (error) throw error;
+    if (!data?.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">No votes yet.</p>'; return; }
+    container.innerHTML = data.map((s, i) => `
+      <div class="leaderboard-item" onclick="showPage('site', {id: '${s.id}', slug: '${s.slug}'})">
+        <span class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span>
+        <span class="lb-title">${escHtml(s.title)}</span>
+        <span class="lb-score">▲${s.votes||0}</span>
+      </div>
+    `).join('');
+  } catch(e) { container.innerHTML = ''; }
+}
+
+async function loadTodayBest() {
+  const container = document.getElementById('today-list');
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    const { data, error } = await supabase
+      .from('sites')
+      .select('id, slug, title, votes')
+      .gte('created_at', today + 'T00:00:00Z')
+      .order('votes', { ascending: false })
+      .limit(5);
+    if (error) throw error;
+    if (!data?.length) { container.innerHTML = '<p style="color:var(--muted);font-size:13px;">Nothing generated today yet!</p>'; return; }
+    container.innerHTML = data.map((s, i) => `
+      <div class="leaderboard-item" onclick="showPage('site', {id: '${s.id}', slug: '${s.slug}'})">
+        <span class="lb-rank">#${i+1}</span>
+        <span class="lb-title">${escHtml(s.title)}</span>
+        <span class="lb-score">▲${s.votes||0}</span>
+      </div>
+    `).join('');
+  } catch(e) { container.innerHTML = ''; }
+}
+
+async function updateStats() {
+  if (!supabaseReady) return;
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const [total, todayCount, agg] = await Promise.all([
+      supabase.from('sites').select('id', { count: 'exact', head: true }),
+      supabase.from('sites').select('id', { count: 'exact', head: true }).gte('created_at', today + 'T00:00:00Z'),
+      supabase.from('sites').select('votes.sum(), views.sum()'),
+    ]);
+
+    document.getElementById('stat-total').textContent = formatNum(total.count || 0);
+    document.getElementById('stat-today').textContent = formatNum(todayCount.count || 0);
+
+    if (agg.data?.[0]) {
+      const sums = agg.data[0];
+      document.getElementById('stat-votes').textContent = formatNum(sums.sum || 0);
+      document.getElementById('stat-views').textContent = formatNum(sums['sum_1'] || 0);
+    }
+  } catch(e) {}
+}
+
+// ── BROWSE ──
+async function loadBrowseData(append = false) {
+  const container = document.getElementById('browse-grid');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  if (!append) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:40px 0;text-align:center;">Loading archive…</div>';
+    browseOffset = 0;
+  }
+
+  if (!supabaseReady) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🛠️</div><h3>Setup Required</h3><p>Configure Supabase to see the archive.</p></div>';
+    return;
+  }
+
+  const PAGE_SIZE = 12;
+  try {
+    let query = supabase
+      .from('sites')
+      .select('id, slug, title, views, votes, created_at')
+      .range(browseOffset, browseOffset + PAGE_SIZE - 1);
+
+    if (browseSearchQuery) {
+      query = query.ilike('title', `%${browseSearchQuery}%`);
+    }
+
+    if (browseSort === 'new') query = query.order('created_at', { ascending: false });
+    else if (browseSort === 'top') query = query.order('votes', { ascending: false });
+    else if (browseSort === 'views') query = query.order('views', { ascending: false });
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    if (!append) container.innerHTML = '';
+
+    if (!data?.length && !append) {
+      container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🌌</div><h3>No sites found</h3><p>Try a different search or generate something!</p></div>';
+      loadMoreBtn.style.display = 'none';
+      return;
+    }
+
+    data.forEach(site => {
+      const card = document.createElement('div');
+      card.className = 'browse-card';
+      const voted = votedSites.includes(site.id);
+      card.innerHTML = `
+        <div class="browse-card-title">${escHtml(site.title)}</div>
+        <div class="browse-card-slug">haluweb.com/site/${escHtml(site.slug)}</div>
+        <div class="browse-card-footer">
+          <div class="browse-card-stats">
+            <span>👁 ${formatNum(site.views||0)}</span>
+            <span>▲ ${formatNum(site.votes||0)}</span>
+          </div>
+          <button class="browse-card-upvote ${voted?'voted':''}"
+            onclick="event.stopPropagation(); upvoteSite('${site.id}', this)">
+            ${voted ? '▲ Voted' : '▲ Vote'}
+          </button>
+        </div>
+      `;
+      card.addEventListener('click', () => showPage('site', { id: site.id, slug: site.slug }));
+      container.appendChild(card);
+    });
+
+    browseOffset += PAGE_SIZE;
+    loadMoreBtn.style.display = data.length === PAGE_SIZE ? 'inline-flex' : 'none';
+
+  } catch(e) {
+    if (!append) container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">⚠️</div><h3>Error loading sites</h3><p>' + e.message + '</p></div>';
+  }
+}
+
+function loadMoreSites() {
+  loadBrowseData(true);
+}
+
+function setSort(sort) {
+  browseSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort-' + sort)?.classList.add('active');
+  browseOffset = 0;
+  loadBrowseData();
+}
+
+function handleSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    browseSearchQuery = document.getElementById('search-input').value.trim();
+    browseOffset = 0;
+    loadBrowseData();
+  }, 350);
+}
+
+async function upvoteSite(id, btn) {
+  if (!supabaseReady) return;
+  if (votedSites.includes(id)) { showToast('Already voted!', 'info'); return; }
+  try {
+    await supabase.rpc('increment_votes', { site_id: id });
+    votedSites.push(id);
+    localStorage.setItem('hw_voted', JSON.stringify(votedSites));
+    btn.textContent = '▲ Voted';
+    btn.classList.add('voted');
+    showToast('▲ Upvoted!', 'success');
+  } catch(e) {
+    showToast('Failed to upvote', 'error');
+  }
+}
+
+// ── RENDER HELPERS ──
+function renderSiteList(container, sites, showRank = false) {
+  if (!sites?.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌀</div><h3>No sites yet</h3><p>Generate one to get started!</p></div>';
+    return;
+  }
+  container.innerHTML = sites.map((s, i) => {
+    const voted = votedSites.includes(s.id);
+    return `
+    <div class="site-card" onclick="showPage('site', {id: '${s.id}', slug: '${s.slug}'})">
+      ${showRank ? `<div class="site-card-rank">${i+1}</div>` : ''}
+      <div class="site-card-body">
+        <div class="site-card-title">${escHtml(s.title)}</div>
+        <div class="site-card-slug">haluweb.com/site/${escHtml(s.slug)}</div>
+        <div class="site-card-meta">
+          <span class="site-card-views">👁 ${formatNum(s.views||0)}</span>
+          <span class="site-card-votes">▲ ${formatNum(s.votes||0)}</span>
+        </div>
+      </div>
+      <button class="site-card-upvote ${voted?'voted':''}"
+        onclick="event.stopPropagation(); upvoteSite('${s.id}', this)">
+        ${voted ? '▲' : '▲'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+// ── URL ROUTING ──
+function handleInitialRoute() {
+  const path = window.location.pathname;
+  if (path.startsWith('/site/')) {
+    const slug = path.replace('/site/', '');
+    if (slug && supabaseReady) {
+      supabase.from('sites').select('id, slug').eq('slug', slug).single().then(({ data }) => {
+        if (data) showPage('site', { id: data.id, slug: data.slug });
+        else showPage('home');
+      });
+    } else showPage('home');
+  } else if (path === '/generate') {
+    showPage('generate');
+  } else if (path === '/browse') {
+    showPage('browse');
+  } else {
+    showPage('home');
+  }
+}
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded', () => {
+  initSupabase();
+  handleInitialRoute();
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     SUPABASE SETUP INSTRUCTIONS (for developer)
+════════════════════════════════════════════════
+
+Run these SQL commands in your Supabase SQL editor:
+
+-- 1. Create sites table
+CREATE TABLE sites (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  html TEXT NOT NULL,
+  views INTEGER DEFAULT 0,
+  votes INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Create indexes for performance
+CREATE INDEX idx_sites_created_at ON sites(created_at DESC);
+CREATE INDEX idx_sites_votes ON sites(votes DESC);
+CREATE INDEX idx_sites_views ON sites(views DESC);
+CREATE INDEX idx_sites_slug ON sites(slug);
+
+-- 3. RPC function: increment views
+CREATE OR REPLACE FUNCTION increment_views(site_id UUID)
+RETURNS void AS $$
+  UPDATE sites SET views = views + 1 WHERE id = site_id;
+$$ LANGUAGE SQL;
+
+-- 4. RPC function: increment votes
+CREATE OR REPLACE FUNCTION increment_votes(site_id UUID)
+RETURNS void AS $$
+  UPDATE sites SET votes = votes + 1 WHERE id = site_id;
+$$ LANGUAGE SQL;
+
+-- 5. Enable Row Level Security (RLS)
+ALTER TABLE sites ENABLE ROW LEVEL SECURITY;
+
+-- 6. Allow public read
+CREATE POLICY "Public read" ON sites FOR SELECT USING (true);
+
+-- 7. Allow public insert (for generation)
+CREATE POLICY "Public insert" ON sites FOR INSERT WITH CHECK (true);
+
+-- 8. Allow public update (for views/votes via RPC only)
+CREATE POLICY "Public update" ON sites FOR UPDATE USING (true);
+
+════════════════════════════════════════════════ -->
+
 </body>
 </html>
