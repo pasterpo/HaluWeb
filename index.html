@@ -5,34 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haluweb - Loading Reality...</title>
     <style>
+        /* We removed the restrictive wrapper so the AI gets the full screen back! */
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background: #0d0d13;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-        
-        /* This wrapper guarantees the generated website is ALWAYS perfectly centered */
-        #main-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 20px;
-        }
-
-        #website-container {
-            width: 100%;
-            max-width: 800px; /* Keeps the page tightly grouped and beautifully centered */
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            overflow: hidden;
-            display: none; /* Hidden until loaded */
+            background: #0f0f16;
         }
 
         #loader {
@@ -56,14 +35,12 @@
             margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #error-details {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #ff5555;
-            background: rgba(255,0,0,0.1);
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
+        
+        #website-container {
+            width: 100%;
+            min-height: 100vh;
+            background: white;
+            display: none; /* Hidden until the AI finishes typing */
         }
     </style>
 </head>
@@ -72,34 +49,27 @@
     <div id="loader">
         <div class="spinner"></div>
         <div id="status-text">🔮 Shifting dimensions...<br><span style="font-size: 14px; color: #888;">Harvesting peak internet chaos...</span></div>
-        <div id="error-details"></div>
     </div>
     
-    <div id="main-wrapper">
-        <div id="website-container"></div>
-    </div>
+    <div id="website-container"></div>
 
     <script>
-        // Your working API key
         const OPENROUTER_API_KEY = "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";
 
         const SYSTEM_PROMPT = `
-        You are Haluweb, a chaotic, deeply satirical AI that invents completely fake, bizarre single-page websites.
+        You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre single-page websites.
         
-        CRITICAL LAYOUT RULES:
-        1. Do not include <html>, <head>, or <body> tags. Output ONLY the inner HTML content.
-        2. Everything you generate must be wrapped inside a clean, modern container div.
-        3. Use beautiful, modern CSS inside a <style> tag. Use flexbox or grid to ensure text and columns are perfectly aligned, spaced, and visually striking.
-        4. If you include images (<img src="...">), use high-quality, completely random placeholders from "https://images.unsplash.com/photo-..." or similar real, live URLs so they don't look broken.
+        STRICT RULES FOR TOKENS & LAYOUT:
+        1. KEEP IT SHORT. Do not generate massive pages. Use minimal, efficient HTML/CSS to save tokens. Max 2 or 3 distinct sections.
+        2. Design it to look beautiful and normal on a full-screen desktop layout, but make the actual text/business idea completely unhinged and funny.
+        
+        STRICT RULE FOR IMAGES (CRITICAL):
+        You MUST use exactly this URL format for images: "https://picsum.photos/seed/{random_word}/400/300". 
+        Replace {random_word} with a word related to your concept. NEVER invent your own URLs. ALWAYS use this picsum format.
+        
+        BUTTON LOGIC:
+        Every button must have a funny inline JavaScript 'onclick' alert that pranks the user or says something absurd.
 
-        PEAK HUMOR & BUTTON LOGIC RULES:
-        1. Invent an unhinged concept (e.g., an insurance agency for when you wake up as a beetle, a subscription service that sends an actor to argue with your landlord, a luxury store selling customized rocks that whisper insults).
-        2. EVERY single button, link, or input form MUST have hilarious inline JavaScript logic attached to it via 'onclick' or custom scripts. 
-        3. Clicking a button should NOT redirect the page. Instead, it must trigger funny alert boxes, modify the page text dynamically, launch a fake popup, play a prank, or make elements disappear.
-           - Example 1: Clicking 'Buy Now' triggers an alert: "Transaction failed. Your bank account has been replaced with 400 lbs of loose gravel. Check your front porch."
-           - Example 2: Clicking 'Submit' changes the main header text to "YOU HAVE AWOKEN THE ANCIENT ONE."
-           - Example 3: Make a button that literally flies away or shrinks when clicked.
-        
         Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html).
         `;
 
@@ -114,24 +84,24 @@
                         "X-Title": "HaluWeb"
                     },
                     body: JSON.stringify({
-                        "model": "google/gemini-2.5-flash-lite",
+                        "model": "openrouter/free", // Keeps it strictly on the free tier
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Generate a beautiful, perfectly-aligned, peak-humor page with fully working chaotic buttons." }
+                            { "role": "user", "content": "Generate a fast, short, full-screen, funny website with working Picsum images." }
                         ]
                     })
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`OpenRouter Error ${response.status}: ${errorText}`);
+                    throw new Error("API Error");
                 }
 
                 const data = await response.json();
                 let aiHtml = data.choices[0].message.content;
 
-                // Clean up markdown blocks if the model slipped up
-                aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
+                // Clean up markdown blocks
+                aiHtml = aiHtml.replace(/```html/g, "").replace(/
+```/g, "").trim();
 
                 // Inject and display
                 document.getElementById('loader').style.display = 'none';
@@ -139,17 +109,12 @@
                 container.innerHTML = aiHtml;
                 container.style.display = 'block';
                 
-                // Dynamically update title if the AI provided one
                 const aiTitle = container.querySelector("title, h1");
                 if (aiTitle) document.title = "Haluweb - " + aiTitle.innerText.substring(0, 30);
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('loader').querySelector('.spinner').style.display = 'none';
-                document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
-                const errorDiv = document.getElementById('error-details');
-                errorDiv.style.display = 'block';
-                errorDiv.innerText = "Technical details: " + error.message;
+                document.getElementById('loader').innerHTML = "🛑 The reality portal collapsed! Refresh to try again.";
             }
         }
 
