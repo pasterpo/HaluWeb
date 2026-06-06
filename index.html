@@ -3,169 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - Loading Reality...</title>
+    <title>Haluweb - Efficiency Mode</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100vh; /* Changed from height: 100% so it can grow and scroll! */
-            background: #0f0f16;
-            font-family: system-ui, sans-serif;
-            overflow-x: hidden; /* Stops left-right scrolling, allows up-down scrolling */
-        }
-        #loader {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 22px;
-            color: #00ffcc;
-            text-align: center;
-        }
-        .spinner {
-            border: 4px solid rgba(0,255,204,0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border-left-color: #00ffcc;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; min-height: 100vh; background: #000; color: #fff; font-family: sans-serif; }
+        #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0f0; }
+        .spinner { border: 4px solid #111; width: 40px; height: 40px; border-radius: 50%; border-top-color: #0f0; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #error-box {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 50, 50, 0.1);
-            border: 1px solid #ff5555;
-            color: #ff5555;
-            border-radius: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        #website-container {
-            width: 100%;
-            min-height: 100vh;
-            background: white;
-            display: none;
-            overflow-y: auto; /* Forces the scrollbar to exist if content is long */
-        }
+        #error-box { display: none; padding: 20px; color: #f00; }
+        #website-container { width: 100%; display: none; }
     </style>
 </head>
 <body>
-
     <div id="loader">
         <div class="spinner" id="spin-ring"></div>
-        <div id="status-text">🔮 Shifting dimensions...<br><span style="font-size: 14px; color: #888;">Harvesting peak internet chaos... (Max wait: 15s)</span></div>
+        <p>Harvesting 1000 tokens of chaos...</p>
         <div id="error-box"></div>
     </div>
-    
     <div id="website-container"></div>
 
     <script>
-        let OPENROUTER_API_KEY = localStorage.getItem("haluweb_key");
-        if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === "null") {
-            OPENROUTER_API_KEY = prompt("🔑 SECURITY BYPASS: Enter your OpenRouter API Key to start Haluweb:");
-            localStorage.setItem("haluweb_key", OPENROUTER_API_KEY);
-        }
+        let key = localStorage.getItem("haluweb_key");
+        if (!key) { key = prompt("API Key:"); localStorage.setItem("haluweb_key", key); }
 
+        // This prompt forces the AI to be efficient with its token budget
         const SYSTEM_PROMPT = `
-        You are Haluweb, a chaotic, hilarious AI that invents completely fake, bizarre single-page websites.
+        You are Haluweb. Generate a bizarre, unhinged website.
         
-        LAYOUT & CONTENT RULES:
-        1. Write properly formatted HTML and inline CSS (<style>). It does not need to look premium, but it MUST be well-structured and legible.
-        2. Generate A LOT of content. Make it a very long page with multiple weird sections, bizarre rants, fake products, or chaotic lore so the user has to scroll down.
-        3. DO NOT use 'overflow: hidden' on the body or html. Do not hide the scrollbar.
-        4. Make the text absolutely unhinged, deeply satirical, and unpredictable.
+        EFFICIENCY RULES:
+        1. USE MINIFIED HTML/CSS. Do not use unnecessary whitespace. 
+        2. Keep the page structure dense. 
+        3. You have a HARD 1000-token limit. If you reach 900 tokens, conclude immediately.
+        4. Use picsum.photos for images. 
+        5. Every button must have an 'onclick' prank alert.
+        6. Keep CSS properly formatted, properly fitted in the screen, etc.
         
-        STRICT RULE FOR IMAGES:
-        You MUST use this exact URL format for all images: "https://picsum.photos/seed/{random_word}/800/600". Replace {random_word} with a concept word. NEVER invent URLs.
-        
-        BUTTON LOGIC:
-        Every single button must have a hilarious inline JavaScript 'onclick' alert that pranks the user.
-
-        Output ONLY valid, raw HTML code. Do NOT wrap it in markdown code blocks (\`\`\`html).
+        Output raw HTML only. No markdown.
         `;
 
-        function showError(message, detailedError = "") {
-            document.getElementById('spin-ring').style.display = 'none';
-            document.getElementById('status-text').innerHTML = "🛑 The reality portal collapsed!";
-            const errorBox = document.getElementById('error-box');
-            errorBox.style.display = 'block';
-            errorBox.innerHTML = `<strong>Error:</strong> ${message}<br><br><span style="color:#aaa; font-size:12px;">${detailedError}</span>`;
-        }
-
-        async function generateHaluweb() {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); 
-
+        async function generate() {
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
-                    signal: controller.signal,
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://pasterpo.github.io/HaluWeb/", 
-                        "X-Title": "HaluWeb"
-                    },
+                    headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         "model": "google/gemini-2.5-flash-lite", 
+                        "max_tokens": 1000, // <--- THE HARD LIMIT
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Generate a massive, hilarious, properly formatted long-scroll website with working Picsum images." }
+                            { "role": "user", "content": "Create a chaotic long-scroll website." }
                         ]
                     })
                 });
 
-                if (response.status === 401) {
-                    localStorage.removeItem("haluweb_key");
-                    showError("API Key Rejected or Revoked.", "OpenRouter says your key is invalid. Refresh the page to enter a new one.");
-                    return;
-                }
-                
-                if (!response.ok) {
-                    const errText = await response.text();
-                    showError("Server Error from OpenRouter.", `Status Code: ${response.status}. Message: ${errText}`);
-                    return;
-                }
-
                 const data = await response.json();
-                clearTimeout(timeoutId);
-
-                if (!data.choices || data.choices.length === 0) {
-                    showError("Empty Response.", "The AI returned a blank page. Try refreshing.");
-                    return;
-                }
-
-                let aiHtml = data.choices[0].message.content;
-                aiHtml = aiHtml.replace(/```html/g, "").replace(/```/g, "").trim();
-
+                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/```/g, "").trim();
                 document.getElementById('loader').style.display = 'none';
-                const container = document.getElementById('website-container');
-                container.innerHTML = aiHtml;
-                container.style.display = 'block';
-                
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    showError("Generation Timed Out (15s limit).", "The servers are too busy right now and took longer than 15 seconds. Hit refresh to try again!");
-                } else {
-                    showError("Network or Syntax Error.", error.message);
-                }
+                const cont = document.getElementById('website-container');
+                cont.innerHTML = html;
+                cont.style.display = 'block';
+            } catch (err) {
+                document.getElementById('error-box').style.display = 'block';
+                document.getElementById('error-box').innerText = err.message;
             }
         }
-
-        if (OPENROUTER_API_KEY) {
-            generateHaluweb();
-        } else {
-            showError("No API Key Found.", "You didn't enter a key. Refresh to try again.");
-        }
+        generate();
     </script>
 </body>
 </html>
