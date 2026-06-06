@@ -99,7 +99,6 @@
         }
 
         async function generateHaluweb() {
-            // THE NEW, UNBREAKABLE TIMEOUT LOGIC
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000); 
 
@@ -120,6 +119,7 @@
                             { "role": "user", "content": "Generate a fast, short, full-screen, funny website with working Picsum images." }
                         ]
                     })
+                }); // THIS BRACKET WAS MISSING!
 
                 if (response.status === 401) {
                     localStorage.removeItem("haluweb_key");
@@ -134,8 +134,6 @@
                 }
 
                 const data = await response.json();
-                
-                // Clear the timer ONLY after we fully download the data!
                 clearTimeout(timeoutId);
 
                 if (!data.choices || data.choices.length === 0) {
@@ -153,7 +151,7 @@
                 
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    showError("Generation Timed Out (15s limit).", "The free AI servers are too busy right now and took longer than 15 seconds. Hit refresh to try again!");
+                    showError("Generation Timed Out (15s limit).", "The servers are too busy right now and took longer than 15 seconds. Hit refresh to try again!");
                 } else {
                     showError("Network or Syntax Error.", error.message);
                 }
