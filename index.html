@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haluweb - App Layout</title>
+    <title>Haluweb - Debug Mode</title>
     <style>
-        body, html { margin: 0; padding: 0; background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; background: #000; color: #fff; font-family: sans-serif; }
         #loader { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0f0; }
         .spinner { border: 4px solid #111; width: 40px; height: 40px; border-radius: 50%; border-top-color: #0f0; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Forces the AI to keep content contained and app-like */
         #website-container { width: 100%; display: none; }
+        .debug-error { padding: 20px; color: #f00; font-family: monospace; }
     </style>
 </head>
 <body>
     <div id="loader">
         <div class="spinner"></div>
-        <p>Architecting web UI (2000 token limit)...</p>
+        <p>Forging reality (Check Console if blank)...</p>
     </div>
     <div id="website-container"></div>
 
@@ -25,21 +24,14 @@
         let key = localStorage.getItem("haluweb_key");
         if (!key) { key = prompt("API Key:"); localStorage.setItem("haluweb_key", key); }
 
-        // UPDATED: Now forces specific UI components instead of blog text
         const SYSTEM_PROMPT = `
-        You are a chaotic Frontend Web Developer. Build a single-page web app.
+        You are a Frontend Developer. Generate a full, working HTML/CSS website.
         
-        STRUCTURE REQUIREMENTS:
-        1. NO LONG ARTICLES. You must use UI components:
-           - Navbar (with fake links)
-           - Hero Section (Title + CTA Button)
-           - Feature Grid (Cards with icons/images)
-           - A Footer with fake links
-        2. INTERACTIVITY: Every button MUST trigger a JavaScript alert('PRANK'). 
-        3. DESIGN: Dark-mode theme, glassmorphism effects, flexbox/grid only.
-        4. IMAGES: Use picsum.photos for all placeholder images.
-        
-        Output raw HTML/CSS only. No markdown.
+        CRITICAL RULES:
+        1. MUST start with <html><body> and end with </body></html> tags.
+        2. DO NOT use markdown. Return PURE HTML string only.
+        3. All content must be inside a <div class="page-wrapper">...</div>.
+        4. Every button must have a hilarious 'onclick' alert.
         `;
 
         async function generate() {
@@ -52,19 +44,30 @@
                         "max_tokens": 2000, 
                         "messages": [
                             { "role": "system", "content": SYSTEM_PROMPT },
-                            { "role": "user", "content": "Build a modern, dark-mode web app landing page." }
+                            { "role": "user", "content": "Create a hilarious, long-scrolling dark-mode web app landing page." }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/```/g, "").trim();
-                document.getElementById('loader').style.display = 'none';
+                console.log("AI Response received:", data); // DEBUG LINE
+
+                if(!data.choices || !data.choices[0].message.content) {
+                    throw new Error("AI returned empty content");
+                }
+
+                let html = data.choices[0].message.content.replace(/```html/g, "").replace(/
+```/g, "").trim();
+                
+                // Final sanity check: force visibility
                 const cont = document.getElementById('website-container');
                 cont.innerHTML = html;
                 cont.style.display = 'block';
+                document.getElementById('loader').style.display = 'none';
+                
             } catch (err) {
-                alert("Generation failed: " + err.message);
+                console.error("DEBUG ERROR:", err);
+                document.body.innerHTML = `<div class="debug-error"><h1>FAILED</h1><p>${err.message}</p><p>Check the Console (F12) for details!</p></div>`;
             }
         }
         generate();
